@@ -1,6 +1,6 @@
 # Lab 7
 
-**Author**: Brent Woodward & Ryan Gallaway
+**Author**: Brent Woodward & Ryan Gallaway.
 **Version**: 1.0.0
 
 ## Overview
