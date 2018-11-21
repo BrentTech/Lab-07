@@ -28,9 +28,9 @@ Heather Cherwaty
 
 ## Number and name of feature: Refactor Code
 
-Estimate of time needed to complete: _____
+Estimate of time needed to complete: 60 minutes
 
-Start time: _____
+Start time: 10:20am
 
 Finish time: _____
 
