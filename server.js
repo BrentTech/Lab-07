@@ -26,6 +26,8 @@ app.get('/weather', getWeather);
 
 app.get('/yelp', getYelp);
 
+app.get('/movies', getMovies);
+
 //Error Handling
 function handleError(err, res) {
 	console.error(err);
@@ -35,10 +37,10 @@ function handleError(err, res) {
 //Helper functions
 function searchToLatLong(query) {
 	const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${query}&key=${process.env.GEOCODE_API_KEY}`;
-console.log(url);
+// console.log(url);
 	return superagent.get(url)
 	.then(res => {
-		console.log(res.body);
+		// console.log(res.body);
 		return new Location(query, res);
 	})
 	.catch((error, res) => handleError(error, res));
@@ -72,6 +74,20 @@ function getYelp(request, response) {
 	.catch(error => handleError(error, response));
 }
 
+function getMovies(request, response) {
+	const url = `https://api.themoviedb.org/3/search/movie?/api_key=${process.env.MOVIEDB_API_KEY}&query=${request.query.data.search_query}`;
+
+	superagent.get(url)
+	.then(result => {
+		console.log(result);
+		const movieSet = result.results.map( movie => {
+			return new Movie(movie);
+		});
+	response.send(movieSet);
+	})
+	.catch(error => handleError(error, response));
+}
+
 function handleError(error, res){
 	console.error(error);
 	if (res) res.status(500).send('Sorry, something broke');
@@ -97,6 +113,14 @@ function Yelp(restaurant) {
 	this.rating = restaurant.rating;
 	this.price = restaurant.price;
 	this.img_url = restaurant.img_url;
+}
+
+function Movie(movie) {
+	this.title = movie.title;
+	this.release_on = movie.release_date;
+	this.total_votes = movie.vote_count;
+	this.image_url = movie.poster_path;
+	this.overview = movie.overview;
 }
 
 //make sure the server is listening for requests.
