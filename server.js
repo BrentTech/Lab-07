@@ -75,12 +75,14 @@ function getYelp(request, response) {
 }
 
 function getMovies(request, response) {
-	const url = `https://api.themoviedb.org/3/search/movie?/api_key=${process.env.MOVIEDB_API_KEY}&query=${request.query.data.search_query}`;
-
+	const url = `https://api.themoviedb.org/3/search/movie?query=${request.query.data.search_query}&api_key=${process.env.MOVIEDB_API_KEY}`
+	// const url = `https://api.themoviedb.org/3/search/movie?/api_key=${process.env.MOVIEDB_API_KEY}&query=${request.query.data.search_query}`;
+	console.log('this is the url', url);
+	console.log('this the is search_query', request.query.data.search_query)
 	superagent.get(url)
 	.then(result => {
-		console.log(result);
-		const movieSet = result.results.map( movie => {
+		console.log(result.body.results);
+		const movieSet = result.body.results.map( movie => {
 			return new Movie(movie);
 		});
 	response.send(movieSet);
@@ -117,10 +119,12 @@ function Yelp(restaurant) {
 
 function Movie(movie) {
 	this.title = movie.title;
-	this.release_on = movie.release_date;
+	this.released_on = movie.release_date;
+	this.average_votes = movie.vote_average;
 	this.total_votes = movie.vote_count;
-	this.image_url = movie.poster_path;
+	this.image_url = `http://image.tmdb.org/t/p/w185/${movie.poster_path}`
 	this.overview = movie.overview;
+	this.popularity = movie.popularity
 }
 
 //make sure the server is listening for requests.
