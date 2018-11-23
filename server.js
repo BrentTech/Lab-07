@@ -28,6 +28,10 @@ app.get('/yelp', getYelp);
 
 app.get('/movies', getMovies);
 
+app.get('/trails', getTrails);
+
+// app.get('/meetup', getMeetup);
+
 //Error Handling
 function handleError(err, res) {
 	console.error(err);
@@ -76,16 +80,25 @@ function getYelp(request, response) {
 
 function getMovies(request, response) {
 	const url = `https://api.themoviedb.org/3/search/movie?query=${request.query.data.search_query}&api_key=${process.env.MOVIEDB_API_KEY}`
-	// const url = `https://api.themoviedb.org/3/search/movie?/api_key=${process.env.MOVIEDB_API_KEY}&query=${request.query.data.search_query}`;
-	console.log('this is the url', url);
-	console.log('this the is search_query', request.query.data.search_query)
 	superagent.get(url)
 	.then(result => {
-		console.log(result.body.results);
 		const movieSet = result.body.results.map( movie => {
 			return new Movie(movie);
 		});
 	response.send(movieSet);
+	})
+	.catch(error => handleError(error, response));
+}
+
+function getTrails(request, response) {
+	const url = `https://www.hikingproject.com/data/get-trails?lat=${request.query.data.latitude}&lon=${request.query.data.longitude}&key=${process.env.TRAILS_API_KEY}`
+	superagent.get(url)
+	.then(result => {
+		console.log(result.body.trails);
+		const trailList = result.body.trails.map( trail => {
+			return new Trail(trail);
+		});
+		response.send(trailList)
 	})
 	.catch(error => handleError(error, response));
 }
@@ -125,6 +138,19 @@ function Movie(movie) {
 	this.image_url = `http://image.tmdb.org/t/p/w185/${movie.poster_path}`
 	this.overview = movie.overview;
 	this.popularity = movie.popularity
+}
+
+function Trail(trail) {
+	this.trail_url = trail.url;
+	this.name = trail.name;
+	this.location = trail.location;
+	this.length = trail.length;
+	this.condition_date = trail.conditionDate.split(' ')[0];
+	this.condition_time = trail.conditionDate.split(' ')[1];
+	this.conditions = trail.conditionDetails;
+	this.stars = trail.stars;
+	this.star_votes = trail.starVotes;
+	this.summary = trail.summary;
 }
 
 //make sure the server is listening for requests.
