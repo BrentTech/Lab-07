@@ -30,7 +30,7 @@ app.get('/movies', getMovies);
 
 app.get('/trails', getTrails);
 
-// app.get('/meetup', getMeetup);
+app.get('/meetup', getMeetup);
 
 //Error Handling
 function handleError(err, res) {
@@ -91,14 +91,27 @@ function getMovies(request, response) {
 }
 
 function getTrails(request, response) {
-	const url = `https://www.hikingproject.com/data/get-trails?lat=${request.query.data.latitude}&lon=${request.query.data.longitude}&key=${process.env.TRAILS_API_KEY}`
+	const url = `https://www.hikingproject.com/data/get-trails?lat=${request.query.data.latitude}&lon=${request.query.data.longitude}&key=${process.env.TRAILS_API_KEY}`;
 	superagent.get(url)
 	.then(result => {
-		console.log(result.body.trails);
+		// console.log(result.body.trails);
 		const trailList = result.body.trails.map( trail => {
 			return new Trail(trail);
 		});
-		response.send(trailList)
+		response.send(trailList);
+	})
+	.catch(error => handleError(error, response));
+}
+
+function getMeetup(request, response) {
+	const url = `https://api.meetup.com/find/upcoming_events?lon=${request.query.data.longitude}&page=20&lat=${request.query.data.latitude}&key=${process.env.MEETUP_API_KEY}`;
+	superagent.get(url)
+	.then(result => {
+		console.log(result.body);
+		const meetupList = result.body.events.map( meet => {
+			return new Meetup(meet);
+		});
+		response.send(meetupList);
 	})
 	.catch(error => handleError(error, response));
 }
@@ -151,6 +164,14 @@ function Trail(trail) {
 	this.stars = trail.stars;
 	this.star_votes = trail.starVotes;
 	this.summary = trail.summary;
+}
+
+function Meetup(meet) {
+	this.link = meet.link;
+	this.name = meet.name;
+	this.host = meet.venue.name;
+	// this.creation_date = meet.created
+	this.creation_date = new Date(meet.created * 1000).toString().slice(0, 15);
 }
 
 //make sure the server is listening for requests.
